@@ -22,6 +22,7 @@ class ResumeService(frontendRepo: DeveloperRepository,
       resumes = for {
           (developer, prSet) <- developers.zip(prSets)
           education = developer.education.flatMap(educations.get)
+          _ <- List(developer) if education.exists(edu => edu.level.id >= req.educationLevel)
         } yield Resume(
           developer.name,
           developer.age,

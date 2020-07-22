@@ -4,7 +4,7 @@ import org.scalacheck.{Arbitrary, Gen}
 import shapeless.tag
 
 trait Generators {
-  val genInt: Gen[Int] = implicitly[Arbitrary[Int]].arbitrary
+  val genInt: Gen[Int] = implicitly[Arbitrary[Int]].arbitrary.map(_.abs)
   implicit val arbName: Arbitrary[Name] = Arbitrary(Gen.oneOf("Donald Trump", "Rijkman Groenink", "Donna Rotunno")
     .map(tag[NameTag][String]))
   implicit val arbAge: Arbitrary[Age] = Arbitrary(genInt.map(_ % 40 + 25).map(tag[AgeTag][Int]))
@@ -18,7 +18,7 @@ trait Generators {
     .map(tag[CourseTitleTag][String]))
   implicit val arbRoleName: Arbitrary[RoleName] = Arbitrary(Gen.oneOf("CTO", "Developer", "Software architect")
     .map(tag[RoleNameTag][String]))
-  implicit val arbEducationId: Arbitrary[EducationId] = Arbitrary(Gen.listOfN(10, genInt.map(i => (i % 10).abs)).map(_.mkString(""))
+  implicit val arbEducationId: Arbitrary[EducationId] = Arbitrary(Gen.listOfN(10, genInt.map(_ % 10)).map(_.mkString(""))
     .map(tag[EducationIdTag][String]))
   implicit val arbGithubHandle: Arbitrary[GithubHandle] = Arbitrary(Gen.oneOf("scroogemcduck", "foobar1998", "modersky")
     .map(tag[GithubHandleTag][String]))
