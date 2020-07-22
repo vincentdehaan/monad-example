@@ -1,6 +1,5 @@
 package nl.vindh.monadexample
 
-import nl.vindh.monadexample.domain.EducationLevel.EducationLevel
 import shapeless.tag.@@
 
 package object domain {

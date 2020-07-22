@@ -10,7 +10,7 @@ class ResumeService(frontendRepo: DeveloperRepository,
                     backendRepo: DeveloperRepository,
                     educationRepo: EducationRepository,
                     githubClient: GithubClient)(implicit ec: ExecutionContext) {
-  def getResumes(req: ResumeRequest): Future[Seq[Resume]] =
+  def getResumes(req: ResumeRequest)(implicit traceId: String): Future[Seq[Resume]] =
     for {
       developers <- req.tpe match {
         case "FRONTEND" => frontendRepo.getDevelopers
