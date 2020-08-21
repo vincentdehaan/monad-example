@@ -12,9 +12,7 @@ object Main extends App {
   val educationRepo = new RandomEducationRepository
   val githubClient = new RandomGithubClient
 
-  val resumeService = new ResumeService(frontendRepo, backendRepo, educationRepo, githubClient)
-
-  val api = new Api(resumeService)
+  val api = new Api(frontendRepo, backendRepo, educationRepo, githubClient)
 
   val bindingFuture = Http().bindAndHandle(api.route, "localhost", 8080)
   println(s"Server online at http://localhost:8080/")
