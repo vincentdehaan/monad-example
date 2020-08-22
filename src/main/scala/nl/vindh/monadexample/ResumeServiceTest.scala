@@ -52,6 +52,6 @@ object ResumeServiceTest extends Generators {
     }
 
   def main(args: Array[String]): Unit = {
-    println(ResumeService.getResumes(ResumeRequest("BACKEND", 4)).foldMap(testInterpreter))
+    println(ResumeService.getResumes(ResumeRequest("BACKEND", -1)).foldMap(testInterpreter))
   }
 }

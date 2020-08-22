@@ -1,10 +1,9 @@
 package nl.vindh.monadexample
 
-import nl.vindh.monadexample.domain._
-
 import cats.free.Free
 import cats.free.Free.liftF
 import cats.implicits._
+import nl.vindh.monadexample.domain._
 
 object ResumeService {
   // All side effects we want to do, encoded as sealed trait:
@@ -34,8 +33,19 @@ object ResumeService {
   def failure[A](t: Throwable) =
     liftF[ResumeAction, A](Failure(t))
 
-  def getEducationWithId(educationId: EducationId) =
-    getEducation(educationId).map(education => educationId -> education)
+  def getResume(requiredEducation: Int)(developer: Developer): ResumeActionF[Option[Resume]] =
+    for {
+      education <- developer.education.toList.traverse(getEducation)
+      prSet <- getProjectsByName(developer.githubHandle)
+    } yield Option.when(education.exists(_.level.id >= requiredEducation)) {
+      Resume(
+        developer.name,
+        developer.age,
+        developer.experience.toSeq.sortBy(_.startYear),
+        education,
+        prSet.toSeq
+      )
+    }
 
   // No more dependencies, no more implicit ExecutionContext
   // No more implicit trace id:
@@ -43,22 +53,10 @@ object ResumeService {
     for {
       developers <- req.tpe match {
         case "FRONTEND" => getFrontendDevelopers.map(_.toList)
-        case "BACKEND" => getBackendDevelopers.map(_.toList)
-        case unknown => failure[List[Developer]](new Exception(s"Unknown developer type requested: $unknown"))
+        case "BACKEND"  => getBackendDevelopers.map(_.toList)
+        case unknown    => failure[List[Developer]](new Exception(s"Unknown developer type requested: $unknown"))
       }
-      educations <- developers.flatMap(_.education).distinct.traverse(eduId => getEducation(eduId).map((eduId, _))).map(_.toMap)
-      prSets <- developers.map(_.githubHandle).traverse(getProjectsByName)
-      resumes = for {
-        (developer, prSet) <- developers.zip(prSets)
-        education = developer.education.flatMap(educations.get)
-        _ <- List(developer) if education.exists(edu => edu.level.id >= req.educationLevel)
-      } yield Resume(
-        developer.name,
-        developer.age,
-        developer.experience.toSeq.sortBy(_.startYear),
-        education,
-        prSet.toSeq
-      )
-    } yield resumes
+      resumes <- developers.traverse(getResume(req.educationLevel))
+    } yield resumes.flatten
 
 }
