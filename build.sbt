@@ -2,7 +2,10 @@ name := "monad-example"
 
 version := "0.1"
 
-scalaVersion := "2.13.3"
+val dottyVersion = "0.27.0-RC1"
+
+scalaVersion := dottyVersion
+
 
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-http"   % "10.1.12",
@@ -14,4 +17,4 @@ libraryDependencies ++= Seq(
   "io.circe" %% "circe-core" % "0.14.0-M1", // We need this version because of the tagged types
   "io.circe" %% "circe-shapes" % "0.14.0-M1",
   "io.circe" %% "circe-generic" % "0.14.0-M1"
-)
+).map(_.withDottyCompat(dottyVersion))
